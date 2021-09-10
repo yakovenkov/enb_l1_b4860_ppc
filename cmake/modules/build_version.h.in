@@ -1,0 +1,7 @@
+#ifndef BUILD_VERSION_H
+#define BUILD_VERSION_H
+
+#define @_prefix@GIT_REVISION "@_build_version@"
+#define @_prefix@BUILD_TIMESTAMP "@_time_stamp@"
+
+#endif

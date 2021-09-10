@@ -1,0 +1,10 @@
+﻿---
+BasedOnStyle: Microsoft
+IndentCaseLabels: 'true'
+IndentWidth: '4'
+Language: Cpp
+SpaceBeforeParens: Never
+TabWidth: '4'
+UseTab: AlignWithSpaces
+
+...

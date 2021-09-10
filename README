@@ -1,0 +1,50 @@
+OVERVIEW
+
+This is quite simple but almost working LTE L1 implementation for the famous NXP's B4860 SoC.
+
+It successfully runs on top of B4860QDS board and other B4860-based modules with commercial RRU
+connected via CPRI link (YD/T 2731-2014 and newer).
+
+This repository contains PowerPC side of IPC/FAPI implementation, RRU control and simple FAPI 
+generator used for development and testing.
+
+BUILD
+
+Build requirements:
+
+1. Firmware binary for SC3900FP
+2. QorIQ SDK for PowerPC (ver 1.7 or higher)
+3. PowerPC Linux kernel with PREEMPT_RT patch applied
+
+Build process:
+
+1. Build kernel modules located in b4860/libb4860/kernel
+2. Use standard CMake build flow
+
+   CMake options:
+     ENABLE_L2_FAPI_GEN_4G - enable build of FAPI generator
+     ENABLE_B4860_DIRECT_LOG - use direct logging from SC3900FP
+     ENABLE_CPRI_ETH_FDD - use FDD RRU (YD/T 2731-2014/FDD compliant)
+   
+   Available targets:
+     dsp_bt - DSP boot utility, used to load DSP image to SC3900FP cores
+     fapi_b4860_v1 - FAPI and IPC library for PowerPC side
+     l2_fapi_generator_dl - FAPI generator
+
+After successfull build, copy binaries to B4860, use scripts/init.sh to load modules and 
+setup TAP interface to communicate the RRU over CPRI link.
+
+Note, IPC implementation used here is quite differs from original Freescale's one and 
+isn't compatible with it.
+
+FOOTNOTES
+
+Please see LICENSE file for the terms of licensing and usage.
+Note, this code includes some codelines from other open-source projects, adopted to B4860, please 
+see headers in source files.
+
+Feel free to contact us if you have any questions or suggestions.
+
+-- 
+Valentin Yakovenkov <yakovenkov@gmail.com>
+Artem Shatalov <bravemurder67@gmail.com>

@@ -1,0 +1,183 @@
+L2-FAPI-GENERATOR-CONFIG DEFINITIONS AUTOMATIC TAGS ::= BEGIN
+L2-FAPI-GENERATOR-CONFIG ::= SEQUENCE {
+    -- General configuration
+    general SEQUENCE {
+        use-sibs-for-p5 BOOLEAN, -- Use P5 values from SIBx
+        auto-mib BOOLEAN,  -- Auto-generate MIB by L2/L1
+        auto-sibs BOOLEAN, -- Auto-generate SIBx by L2/L1 (???)
+        stim-start-tti INTEGER (-1 .. MAX), -- Starting TTI, -1 for don't care
+        stim-duration INTEGER (0 .. MAX), -- Total duration of stim if subframes, 0: unlimited
+        stim-loop BOOLEAN, -- Loop stim every stim_duration frames
+        rru SEQUENCE {
+            active BOOLEAN, -- Enable RRU path
+            earfcn INTEGER -- RRU earfcn
+        }
+    },
+
+    -- P5 configuration
+    -- ALl fields are mandatory
+    p5 SEQUENCE {
+        duplex INTEGER (0..2), -- 0: TDD, 1: FDD, 2: HD_FDD
+        pcfich-power-offset INTEGER (0 .. 10000), -- Value: 0..10000, represents -6dB to 4dB in steps 0.001dB
+        p-b INTEGER (0 .. 3), -- Value is an index into the referenced table. Value: 0..3
+        cyclic-prefix INTEGER (0 .. 1), -- 0: NORMAL, 1: EXTENDED
+        rf-config SEQUENCE {
+            nprb INTEGER (0 .. 100),
+            tx-antenna-ports INTEGER (1 .. 64),
+            rx-antenna-ports INTEGER (1 .. 64),
+            rs-power INTEGER (0 .. 255) -- Value: 0..255 representing 0dB to -63.75dB in -0.25dB steps
+        },
+        phich-config SEQUENCE {
+            phich-resource INTEGER  (0 .. 3), -- 0: PHICH_R_ONE_SIXTH, 1: PHICH_R_HALF, 2: PHICH_R_ONE, 3: PHICH_R_TWO
+            phich-duration INTEGER (0 .. 1), -- 0: PHICH_D_NORMAL, 1: PHICH_D_EXTENDED,
+            phich-power-offset INTEGER (0 .. 10000) -- Value: 0..10000 represents -6dB to 4dB in steps 0.001dB
+        },
+        sch-config SEQUENCE {
+            pss-epre INTEGER (0 .. 10000), -- Value: 0..10000 represents -6dB to 4dB in step 0.001dB
+            sss-epre INTEGER (0 .. 10000), -- Value: 0..10000 represents -6dB to 4dB in step 0.001dB
+            physical-cell-id INTEGER (0 .. 503) -- 0..503
+        },
+        prach-config SEQUENCE {
+            configuration-index INTEGER (0 .. 63), -- 0..63
+            root-sequence-index INTEGER (0 .. 837), -- 0..837
+            zero-correlation-zone-configuration INTEGER (0 .. 15), -- TDD: 0..6, FDD: 0..15
+            frequency-offset INTEGER (0 .. 94), -- 0..nprb-6
+            high-speed-flag INTEGER (0 .. 1) -- 0: HS_UNRESTRICTED_SET, 1: HS_RESTRICTED_SET
+        },
+        pusch-config SEQUENCE {
+            hopping-mode INTEGER (0 .. 1), -- 0: HM_INTER_SF, 1: HM_INTRA_INTER_SF
+            hopping-offset INTEGER (0 .. 98), -- 0..98
+            number-of-subbands INTEGER (1 .. 4) -- 1..4
+        },
+        uplink-reference-signal-config SEQUENCE {
+            uplink-rs-hopping INTEGER (0 .. 2), -- 0: RS_NO_HOPPING, 1: RS_GROUP_HOPPING, 2: RS_SEQUENCE_HOPPING
+            group-assignment INTEGER (0 .. 29), -- 0..29
+            cyclic-shift-1-for-drms INTEGER (0 .. 7) -- 0..7
+        },
+        pucch-config SEQUENCE {
+            n-an-cs INTEGER (1 .. 3), -- 1..3
+            delta-pucch-shift INTEGER (1 .. 3), -- 1 ..3
+            n1-pucch-an INTEGER (0 .. 2047), -- 0..2047
+            n-cqi-rb INTEGER (0 .. 98) -- 0..98
+        }
+    },
+
+    -- Main stim as sequence of P7 messages
+    -- Send FAPI message on every SF.ind
+    p7 SEQUENCE OF SEQUENCE {
+        tti INTEGER (0 .. MAX), -- Absolute TTI number
+
+        -- DL_CONFIG.req, mandatory at least for CFI
+        dl-config SEQUENCE {
+            cfi INTEGER (0 .. 4), -- Number of PDCCH symbols 0..4
+            cfi-power INTEGER (0 .. 10000), -- Value: 0..10000, representing -6 dB to 4 dB in 0.001 dB steps.
+
+            -- PDUs list
+            pdus SEQUENCE OF DL-CONFIG-PDU-TYPE OPTIONAL
+        },
+        ul-config SEQUENCE {
+			-- P8 back-indication PDU filename for UL
+            ndci INTEGER OPTIONAL
+        }
+    }
+}
+
+DL-CONFIG-PDU-TYPE-ENUM ::= ENUMERATED {
+    dci (0),
+	bch (1),
+	mch (2),
+	dlsch (3),
+	pch (4)
+    --PRS_PDU_TYPE (5),
+	--CSI_RS_PDU_TYPE (6),
+	--EPDCCH_DL_PDU_TYPE (7),
+	--MPDCCH_PDU_TYPE (8),
+	--NBCH_PDU_TYPE (9),
+	--NPDCCH_PDU_TYPE (10),
+	--NDLSCH_PDU_TYPE (11)
+}
+
+DCI-FORMAT ::= ENUMERATED {
+    dci1 (0),
+    dci1a (1),
+    dci1b (2),
+    dci1c (3),
+    dci1d (4),
+    dci2 (5),
+    dci2a (6),
+    dci2b (7),
+    dci2c (8),
+    dci2d (9)
+}
+
+DL-CONFIG-PDU-TYPE-DCI ::= SEQUENCE {
+    format DCI-FORMAT,
+    cce INTEGER (0 .. 88),
+    l INTEGER (1 .. 32),
+    rnti INTEGER (0 .. 65535),
+    ra-type INTEGER (0 .. 1),
+    vrb-flag INTEGER (0 .. 1) OPTIONAL,
+    rb-coding INTEGER,
+    mcs-1 INTEGER (0 .. 31),
+    rv-1 INTEGER (0 .. 3),
+    ndi-1 INTEGER (0 .. 1),
+    tb-swap INTEGER (0 .. 1) OPTIONAL,
+    mcs-2 INTEGER (0 .. 31) OPTIONAL,
+    rv-2 INTEGER (0 .. 3) OPTIONAL,
+    ndi-2 INTEGER (0 .. 1) OPTIONAL,
+    harq INTEGER (0 .. 15),
+    tpmi INTEGER (0 .. 15) OPTIONAL,
+    pmi INTEGER (0 .. 2) OPTIONAL,
+    pi INTEGER (0 .. 63) OPTIONAL,
+    tpc INTEGER (0 .. 3) OPTIONAL,
+    downlink-index INTEGER (0 .. 15) OPTIONAL,
+    n-gap INTEGER (0 .. 1) OPTIONAL,
+    tbs-index INTEGER (0 .. 31) OPTIONAL,
+    power-offset INTEGER (0 .. 1) OPTIONAL,
+    prach-flag INTEGER (0 .. 1) OPTIONAL,
+    preamble-index INTEGER (0 .. 63) OPTIONAL,
+    prach-mask INTEGER (0 .. 15) OPTIONAL,
+    rnti-type INTEGER (1 .. 3),
+    power INTEGER (0 .. 10000)
+}
+
+DL-CONFIG-PDU-TYPE-BCH ::= SEQUENCE {
+    pdu OCTET STRING,
+    power INTEGER (0 .. 10000)
+}
+
+DL-CONFIG-PDU-TYPE-DLSCH ::= SEQUENCE {
+    pdu OCTET STRING,
+    rnti INTEGER (0 .. 65535),
+    ra-type INTEGER (0 .. 5),
+    vrb-flag INTEGER (0 .. 1) OPTIONAL,
+    rb-coding INTEGER,
+    modulation INTEGER (2 | 4 | 6 | 8),
+    rv INTEGER (0 .. 3),
+    tb INTEGER (1 .. 2),
+    tb-swap INTEGER (0 .. 1) OPTIONAL,
+    tx-scheme INTEGER (0 .. 13) OPTIONAL,
+    n-layers INTEGER (1 .. 8) OPTIONAL,
+    n-subbands INTEGER (0 .. 13) OPTIONAL,
+    ue-categiry INTEGER (0 .. 14) OPTIONAL,
+    p-a INTEGER (0 .. 7) OPTIONAL,
+    delta-power INTEGER (0 .. 1) OPTIONAL,
+    n-gap INTEGER (0 .. 1) OPTIONAL,
+    n-prb INTEGER (0 .. 1) OPTIONAL,
+    tm INTEGER (1 .. 10) OPTIONAL,
+    n-prb-per-subband INTEGER (0 .. 255)  OPTIONAL
+    -- Beamforming not supported yet
+}
+
+DL-CONFIG-PDU-TYPE ::= CHOICE {
+    dci DL-CONFIG-PDU-TYPE-DCI,
+    bch DL-CONFIG-PDU-TYPE-BCH,
+    dlsch DL-CONFIG-PDU-TYPE-DLSCH
+}
+
+DL-CONFIG-PDU ::= SEQUENCE {
+        --type DL-CONFIG-PDU-TYPE,
+        pdu DL-CONFIG-PDU-TYPE
+}
+
+END

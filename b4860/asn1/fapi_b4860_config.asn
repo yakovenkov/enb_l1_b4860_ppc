@@ -1,0 +1,56 @@
+FAPI-B4860-CONFIG DEFINITIONS AUTOMATIC TAGS ::= BEGIN
+FAPI-B4860-CONFIG ::= SEQUENCE {
+	license OCTET STRING (SIZE(64)) OPTIONAL,
+	--ipc-channel INTEGER,
+	loglevel LOG-LEVEL DEFAULT none,
+	rrus SEQUENCE OF RRU,
+	p8 P8-CONFIG OPTIONAL
+}
+
+RRU ::= SEQUENCE {
+	cpri-port INTEGER,
+	speed CPRI-SPEED,
+	ipc-channel INTEGER,
+	ip PrintableString (SIZE(1..16,...)),
+	freq-dl INTEGER,
+	freq-ul INTEGER,
+	power-dbm INTEGER
+}
+
+LOG-LEVEL ::= ENUMERATED {
+	debug (0),
+	info (1),
+	warning (2),
+	error (3),
+	none (4)
+}
+
+CPRI-SPEED ::= ENUMERATED {
+	s12288 (0),
+	s24576 (1),
+	s30720 (2),
+	s49152 (3),
+	s61440 (4),
+	s98304 (5)
+}
+
+P8-CONFIG ::= SEQUENCE {
+	enable BOOLEAN,
+	limit INTEGER DEFAULT 0,
+	dump-path VisibleString (SIZE(1..500,...)),
+	dump-ul BOOLEAN DEFAULT FALSE,
+	dump-ul-bad-crc BOOLEAN DEFAULT FALSE,
+	dump-ul-pucch BOOLEAN DEFAULT FALSE,
+	dump-ul-pucch-ack BOOLEAN DEFAULT FALSE,
+	dump-ul-pucch-nack BOOLEAN DEFAULT FALSE,
+	dump-ul-pucch-sr BOOLEAN DEFAULT FALSE,
+	dump-ul-pucch-sr-all BOOLEAN DEFAULT FALSE,
+	dump-ul-pucch-not BOOLEAN DEFAULT FALSE,
+	dump-ul-pucch-cqi BOOLEAN DEFAULT FALSE,
+	dump-ul-pusch-ack BOOLEAN DEFAULT FALSE,
+	dump-ul-pusch-nack BOOLEAN DEFAULT FALSE,
+	dump-ul-pusch-cqi BOOLEAN DEFAULT FALSE,
+	dump-ul-llr-check BOOLEAN DEFAULT FALSE
+}
+
+END
