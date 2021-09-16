@@ -42,11 +42,11 @@ static l2_fapi_generator_t *g_l2_fapi_gen = NULL;
  * @return true
  * @return false
  */
-static bool prepare_l2_fapi_generator_configs(const char *path, l2_fapi_generator_config_t *cfg)
+static bool prepare_l2_fapi_generator_configs(const char *stim_path, l2_fapi_generator_config_t *cfg)
 {
 	cfg->l1_name = "l1_b4860_v1";
 	cfg->l1_config = "l1.conf";
-	cfg->l2_stim_filename = "l2_fapi_stim_full.conf";
+	cfg->l2_stim_filename = stim_path;
 
 	return true;
 }
@@ -539,8 +539,14 @@ int l2_fapi_generator_app_entry_point(int argc, char **argv)
 	g_l2_fapi_gen = create_l2_fapi_generator();
 
 	g_l2_fapi_gen->no = 0;
+	
+	if(argc < 2)
+	{
+		LOG_E(L2_FAPI_GEN, "Usage: l2_fapi_generator_dl <stim_file>\n");
+		return -1;
+	}
 
-	prepare_l2_fapi_generator_configs("l2_fapi_generator.conf", &g_l2_fapi_gen->config);
+	prepare_l2_fapi_generator_configs(argv[1], &g_l2_fapi_gen->config);
 
 	// Read L2 FAPI JSON Stimuli file
 	if(read_stim_config(g_l2_fapi_gen) != 0)
