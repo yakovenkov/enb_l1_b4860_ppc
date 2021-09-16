@@ -587,7 +587,9 @@ int main(int argc, char **argv)
 	{
 		LOG_W(L2_FAPI_GEN, "Real-time priority is not allowed\n");
 	}
-
+	
+	log_set_level(LOG_LEVEL_INFO);
+	
 	if(l2_fapi_generator_app_entry_point(argc, argv) < 0)
 	{
 		LOG_E(MAC, "Failed to init eNodeb DU\n");

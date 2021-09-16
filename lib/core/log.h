@@ -38,6 +38,7 @@ typedef enum
 } log_comp_e;
 
 void log_set_tti(uint32_t tti);
+void log_set_level(log_level_e level);
 void log_line_internal(log_comp_e comp, log_level_e level, int nargs, ...);
 void log_line_internal_array(log_comp_e comp, log_level_e level, int nargs, const char *file, int32_t line,
                              const char *msg, void *args);
